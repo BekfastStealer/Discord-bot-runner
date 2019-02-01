@@ -1,0 +1,12 @@
+{
+"name": "Bekfast Bot",
+"description": "Does various cool things.",
+"version": "0.0.0",
+"main": ".",
+"scripts": {
+"start": "node ."
+},
+"dependencies": {
+"discord.js": "11.1.0",
+}
+}
