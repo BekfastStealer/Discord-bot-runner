@@ -1,0 +1,697 @@
+const Discord=require("discord.js");
+const Client=new Discord.Client();
+var id;
+var needReset=false;
+Client.on('ready', () =>{
+    console.log("Bot ready");
+    var offerHelp=function(){
+        if(needReset){
+        Client.channels.get("528915104570408984").send("Remember, you can type []help[|] for a list of Bekfast Bot's commands.");
+        }
+    }
+    setInterval(offerHelp,600000);
+})
+Client.on('message',(message)=>{
+    if(message.author.username==="Bekfast Bot"&&message.content==="Remember, you can type []help[|] for a list of Bekfast Bot's commands."){
+        var delmsg=function(){
+            if(needReset){
+            message.delete();
+            function tellThatNeedReset(){
+                needReset=false;
+            }
+            setTimeout(tellThatNeedReset, 1000);
+            }
+        }
+        setTimeout(delmsg, 600000);
+    }else{
+        needReset=true;
+    }
+})
+Client.on('message',(message)=>{
+    var chan=message.channel.name;
+    if(chan===undefined){
+        chan="dm to bot";
+    }
+    console.log(message.author.username+" said in channel "+chan+": "+message.content);
+    if(message.content.startsWith("[]")&&message.content.endsWith("[|]")){
+        var paramOne;
+        var paramTwo;
+        var paramThree;
+        for(var i=0;i<message.content.length;i++){
+            if(message.content.slice(i,i+3)==="[|]"){
+                if(message.content.slice(i+3)){
+                    if(paramOne===undefined){
+                        paramOne=message.content.slice(i+3,message.content.indexOf("[|]",i+3));
+                    }else if(paramTwo===undefined){
+                        paramTwo=message.content.slice(i+3,message.content.indexOf("[|]",i+3));
+                    }else if(paramThree===undefined){
+                        paramThree=message.content.slice(i+3,message.content.indexOf("[|]",i+3));
+                    }else{
+                        message.channel.send("PARAMETER OVERLOAD");
+                    }
+                }
+            }
+        }
+        if(paramOne==="me"){
+            paramOne=message.author.username;
+        }if(paramTwo==="me"){
+            paramTwo=message.author.username;
+        }if(paramThree==="me"){
+            paramThree=message.author.username;
+        }
+        var helpMsg="Here is a list of commands Bekfast Bot can carry out:\
+        \nUsing 'I'm,' 'I am,' or 'Im' in a message will result in a dad joke.\
+        \n\
+        \n[]help[|]: sends this help menu to you in a dm.\
+        \n[]help ndm[|]: sends this help menu to the channel you entered the command in.\
+        \n\
+        \n[]rng[|]minimum[|]maximum[|]: sends a randomly generated number between the values you input to the channel you put the command in.\
+        \n[]rng dm[|]minimum[|]maximum[|]username[|]: sends a randomly generated number between the values you input in a dm to the user whose username you input. It also sends you a dm telling you what the number is.\
+        \n\
+        \n[]insult[|]phrase[|]: sends a shakespearean insult directed at the phrase you input.\
+        \n[]insult player[|]username[|]: sends a shakespearean insult directed at and mentioning the target player.\
+        \n[]insult dm[|]username[|]: sends a shakespearean insult to the target user in the form of a dm.\
+        \n[]insult general[|]: sends a shakespearean insult directed at no one in particular.\
+        \n\
+        \n[]flatter[|]phrase[|]: sends a shakespearean compliment directed at the phrase you input.\
+        \n[]flatter player[|]username[|]: sends a shakespearean compliment directed at and mentioning the target player.\
+        \n[]flatter dm[|]username[|]: sends a shakespearean compliment to the target user in the form of a dm.\
+        \n[]flatter general[|]: sends a shakespearean compliment directed at no one in particular.\
+        \n\
+        \n[]showfury[|]: express your fury in the chat.\
+        \n[]showfury dm[|]username[|]: express your fury in a dm to the target user.\
+        \n\
+        \nUsing \"me\" as a parameter is the same as inputting your own username.\
+        \nSuggest new features to Bekfast Stealer in #suggestions-for-bot.";
+        if(message.content==="[]help[|]"){
+            message.delete();
+            message.author.send(helpMsg);
+        }else if(message.content==="[]help ndm[|]"){
+            message.channel.send(helpMsg)
+        }else if(message.content.startsWith("[]rng")){
+            var failed=false;
+            paramOne=parseInt(paramOne);
+            paramTwo=parseInt(paramTwo);
+            if(Math.floor(paramOne)===paramOne&&Math.floor(paramTwo)===paramTwo&&paramTwo>=paramOne&&paramOne>=0){
+                var result=Math.floor(Math.random()*(paramTwo-paramOne+1))+paramOne;
+            }else{
+                failed=true;
+            }if(message.content.startsWith("[]rng dm[|]")){
+                message.delete();
+                if(failed){
+                    message.author.send(`The values you entered, ${paramOne} and ${paramTwo} are invalid. In order to be valid, both numbers must be whole numbers, and the maximum value must be greater than or equal to the minimum.`);
+                }else{
+                    if(paramThree===message.author.username){
+                        message.author.send("Your random number between "+paramOne+" and "+paramTwo+" is "+result+".");
+                    }else if(Client.users.find("username",paramThree)){
+                        message.author.send(`You have sent ${Client.users.find("username",paramThree)} a random number between ${paramOne} and ${paramTwo}. This number is ${result}.`);
+                        Client.users.find("username",paramThree).send(message.author+" has sent you a random number between "+paramOne+" and "+paramTwo+". This number is "+result+".");
+                    }else{
+                        message.author.send(paramThree+" does not exist. Make sure you are using the correct spelling and capitalization.");
+                    }
+                }
+            }else{
+                if(failed){
+                    message.channel.send(`The values you entered, ${paramOne} and ${paramTwo} are invalid. In order to be valid, both numbers must be whole numbers, and the maximum value must be greater than or equal to the minimum.`);
+                }else{
+                    message.channel.send(`The random number ${message.author} has requested between ${paramOne} and ${paramTwo} is ${result}.`);
+                }  
+            }
+        }else if(message.content.startsWith("[]showfury")){
+            message.delete();
+            if(message.content.startsWith("[]showfury dm[|]")){
+                if(Client.users.find("username",paramOne)){
+                Client.users.find("username",paramOne).send(message.author+" is __***SHOOK NASTY!!!!!!!!!!***__");
+                }
+            }else{
+                message.channel.send(message.author+" is __***SHOOK NASTY!!!!!!!!!!***__");
+            }
+        }else if(message.content.startsWith("[]insult")&&!message.content.startsWith("[]insult (target):")&&!message.content.startsWith("[]insult general:")){
+            var pOne;
+            var pTwo;
+            var pThree;
+            var beginning;
+            var randomNum=Math.ceil(Math.random()*24);
+            var dm=false;
+            if (message.content!=="[]insult general"){
+                if(message.content.startsWith("[]insult dm")){
+                    message.delete();
+                    dm=true;
+                    if(randomNum===10||randomNum===22){
+                        beginning=message.author+" says: \nThou art an ";
+                    }else{
+                        beginning=message.author+" says: \nThou art a ";
+                    }
+                }else if(message.content.startsWith("[]insult player")){
+                    if(Client.users.find("username",paramOne)){
+                        if(randomNum===10||randomNum===22){
+                            beginning=Client.users.find("username",paramOne)+", thou art an ";
+                        }else{
+                    beginning=Client.users.find("username",paramOne)+", thou art a ";
+                    }}
+                }else{
+                if(randomNum===10||randomNum===22){
+                    beginning=paramOne+", thou art an ";
+                }else{
+                beginning=paramOne+", thou art a ";
+                }}
+            }else{
+                if(randomNum===10||randomNum===22){
+                    beginning="Thou art an ";
+                }else{
+                beginning="Thou art a ";
+                }
+            }
+            switch(randomNum){
+                case 1:
+                pOne="hateful, ";
+                break;
+                case 2:
+                pOne="nasty, ";
+                break;
+                case 3:
+                pOne="common, ";
+                break;
+                case 4:
+                pOne="bloody, ";
+                break;
+                case 5:
+                pOne="vacant, ";
+                break;
+                case 6:
+                pOne="knavish, ";
+                break;
+                case 7:
+                pOne="quarrelsome, ";
+                break;
+                case 8:
+                pOne="grotesque, ";
+                break;
+                case 9:
+                pOne="revolting, ";
+                break;
+                case 10:
+                pOne="unkind, ";
+                break;
+                case 11:
+                pOne="saucy, ";
+                break;
+                case 12:
+                pOne="disgusting, ";
+                break;
+                case 13:
+                pOne="grizzled, ";
+                break;
+                case 14:
+                pOne="spotted, ";
+                break;
+                case 15:
+                pOne="cantankerous, ";
+                break;
+                case 16:
+                pOne="lewd, ";
+                break;
+                case 17:
+                pOne="loathsome, ";
+                break;
+                case 18:
+                pOne="brazen, ";
+                break;
+                case 19:
+                pOne="detestable, ";
+                break;
+                case 20:
+                pOne="reeky, ";
+                break;
+                case 21:
+                pOne="repugnant, ";
+                break;
+                case 22:
+                pOne="abominable, ";
+                break;
+                case 23:
+                pOne="peevish, ";
+                break;
+                case 24:
+                pOne="greasy, ";
+                break;
+                default:
+                message.channel.send("!!!SYSTEM ERROR!!!");
+            }switch(Math.ceil(Math.random()*24)){
+                case 1:
+                pTwo="ill-breeding ";
+                break;
+                case 2:
+                pTwo="low-spirited ";
+                break;
+                case 3:
+                pTwo="cold-blooded ";
+                break;
+                case 4:
+                pTwo="luggage-lipped ";
+                break;
+                case 5:
+                pTwo="double-dealing ";
+                break;
+                case 6:
+                pTwo="pale-hearted ";
+                break;
+                case 7:
+                pTwo="sallow-skinned ";
+                break;
+                case 8:
+                pTwo="puke-stained ";
+                break;
+                case 9:
+                pTwo="green-eyed ";
+                break;
+                case 10:
+                pTwo="lily-livered ";
+                break;
+                case 11:
+                pTwo="eye-offending ";
+                break;
+                case 12:
+                pTwo="long-winded ";
+                break;
+                case 13:
+                pTwo="pasty-faced ";
+                break;
+                case 14:
+                pTwo="dark-hearted ";
+                break;
+                case 15:
+                pTwo="low-down ";
+                break;
+                case 16:
+                pTwo="wax-eared ";
+                break;
+                case 17:
+                pTwo="onion-breathing ";
+                break;
+                case 18:
+                pTwo="paste-brained ";
+                break;
+                case 19:
+                pTwo="broke-dealing ";
+                break;
+                case 20:
+                pTwo="dull-spirited ";
+                break;
+                case 21:
+                pTwo="stone-faced ";
+                break;
+                case 22:
+                pTwo="black-winged ";
+                break;
+                case 23:
+                pTwo="dull-witted ";
+                break;
+                case 24:
+                pTwo="poison-tongued ";
+                break;
+                default:
+                message.channel.send("!!!SYSTEM ERROR!!!");
+            }switch(Math.ceil(Math.random()*24)){
+                case 1:
+                pThree="laughingstock!";
+                break;
+                case 2:
+                pThree="twit!";
+                break;
+                case 3:
+                pThree="ruffian!";
+                break;
+                case 4:
+                pThree="pirate!";
+                break;
+                case 5:
+                pThree="buffoon!";
+                break;
+                case 6:
+                pThree="boar!";
+                break;
+                case 7:
+                pThree="maggot-pie!";
+                break;
+                case 8:
+                pThree="hog!";
+                break;
+                case 9:
+                pThree="scoundrel!";
+                break;
+                case 10:
+                pThree="dolt!";
+                break;
+                case 11:
+                pThree="jack-a-nape!";
+                break;
+                case 12:
+                pThree="serpent!";
+                break;
+                case 13:
+                pThree="dullard!";
+                break;
+                case 14:
+                pThree="devil!";
+                break;
+                case 15:
+                pThree="dung-hill!";
+                break;
+                case 16:
+                pThree="fool!";
+                break;
+                case 17:
+                pThree="coward!";
+                break;
+                case 18:
+                pThree="puke-stocking!";
+                break;
+                case 19:
+                pThree="leper!";
+                break;
+                case 20:
+                pThree="skainsmate!";
+                break;
+                case 21:
+                pThree="infection!";
+                break;
+                case 22:
+                pThree="simpleton!";
+                break;
+                case 23:
+                pThree="villain!";
+                break;
+                case 24:
+                pThree="miscreant!";
+                break;
+                default:
+                message.channel.send("!!!SYSTEM ERROR!!!");
+            }
+            if(!message.content.startsWith("[]insult player[|]")||Client.users.find("username",paramOne)){
+            if(dm){
+                if(Client.users.find("username",paramOne)){
+                Client.users.find("username",paramOne).send(beginning+pOne+pTwo+pThree);
+                message.author.send("Message successfully sent");
+                }else{
+                    message.author.send(paramOne+" does not exist. Make sure you are using the correct spelling and capitalization.");
+                }
+            }else{
+            message.channel.send(beginning+pOne+pTwo+pThree);
+        }}else{
+            message.channel.send(paramOne+" does not exist. Make sure you are using the correct spelling and capitalization.");
+        }
+        }else if(message.content.startsWith("[]flatter")){
+            var pOne;
+            var pTwo;
+            var pThree;
+            var beginning;
+            var randomNum=Math.ceil(Math.random()*24);
+            var dm=false;
+            if (message.content!=="[]flatter general[|]"){
+                if(message.content.startsWith("[]flatter player[|]")){
+                    if(Client.users.find("username",paramOne)){
+                        if(randomNum===4||randomNum===7||randomNum===19){
+                            beginning=Client.users.find("username",paramOne)+", thou art an ";
+                        }else{
+                            beginning=Client.users.find("username",paramOne)+", thou art a ";
+                        }
+                    }
+                }else if(message.content.startsWith("[]flatter dm[|]")){
+                    message.delete();
+                    dm=true;
+                    if(randomNum===4||randomNum===7||randomNum===19){
+                        beginning=message.author+" says: \nThou art an ";
+                    }else{
+                        beginning=message.author+" says: \nThou art a ";
+                    }
+                }else{
+                if(randomNum===4||randomNum===7||randomNum===19){
+                    beginning=paramOne+", thou art an ";
+                }else{
+                beginning=paramOne+", thou art a ";
+                }}}else{
+                if(randomNum===4||randomNum===7||randomNum===19){
+                    beginning="Thou art an ";
+                }else{
+                beginning="Thou art a ";
+                }
+            }switch(randomNum){
+                case 1:
+                pOne="sweet, ";
+                break;
+                case 2:
+                pOne="divine, ";
+                break;
+                case 3:
+                pOne="lovely, ";
+                break;
+                case 4:
+                pOne="inspiring, ";
+                break;
+                case 5:
+                pOne="completely ";
+                break;
+                case 6:
+                pOne="refined, ";
+                break;
+                case 7:
+                pOne="angelic, ";
+                break;
+                case 8:
+                pOne="wise, ";
+                break;
+                case 9:
+                pOne="soothing, ";
+                break;
+                case 10:
+                pOne="wholesome, ";
+                break;
+                case 11:
+                pOne="magical, ";
+                break;
+                case 12:
+                pOne="mellow, ";
+                break;
+                case 13:
+                pOne="thoughtful, ";
+                break;
+                case 14:
+                pOne="good, ";
+                break;
+                case 15:
+                pOne="fresh, ";
+                break;
+                case 16:
+                pOne="delightful, ";
+                break;
+                case 17:
+                pOne="melodious, ";
+                break;
+                case 18:
+                pOne="golden, ";
+                break;
+                case 19:
+                pOne="endearing, ";
+                break;
+                case 20:
+                pOne="strong, ";
+                break;
+                case 21:
+                pOne="delicate, ";
+                break;
+                case 22:
+                pOne="powerful, ";
+                break;
+                case 23:
+                pOne="curteous, ";
+                break;
+                case 24:
+                pOne="kind, ";
+                break;
+                default:
+                message.channel.send("!!!SYSTEM ERROR!!!");
+            }switch(Math.ceil(Math.random()*24)){
+                case 1:
+                pTwo="free-spirited ";
+                break;
+                case 2:
+                pTwo="heaven-created ";
+                break;
+                case 3:
+                pTwo="pure-hearted ";
+                break;
+                case 4:
+                pTwo="clear-seeing ";
+                break;
+                case 5:
+                pTwo="brave-spirited ";
+                break;
+                case 6:
+                pTwo="rose-cheeked ";
+                break;
+                case 7:
+                pTwo="silken-haired ";
+                break;
+                case 8:
+                pTwo="sugar-coated ";
+                break;
+                case 9:
+                pTwo="lilac-scented ";
+                break;
+                case 10:
+                pTwo="brave-willed ";
+                break;
+                case 11:
+                pTwo="doe-eyed ";
+                break;
+                case 12:
+                pTwo="honey-tongued ";
+                break;
+                case 13:
+                pTwo="much-favored ";
+                break;
+                case 14:
+                pTwo="heart-enflaming ";
+                break;
+                case 15:
+                pTwo="clever-witted ";
+                break;
+                case 16:
+                pTwo="all-knowing ";
+                break;
+                case 17:
+                pTwo="ivory-smooth ";
+                break;
+                case 18:
+                pTwo="well-wishing ";
+                break;
+                case 19:
+                pTwo="thunder-darting ";
+                break;
+                case 20:
+                pTwo="mood-lifting ";
+                break;
+                case 21:
+                pTwo="will-buckling ";
+                break;
+                case 22:
+                pTwo="even-tempered ";
+                break;
+                case 23:
+                pTwo="well-fated ";
+                break;
+                case 24:
+                pTwo="spirit-chosen ";
+                break;
+                default:
+                message.channel.send("!!!SYSTEM ERROR!!!");
+            }switch(Math.ceil(Math.random()*24)){
+                case 1:
+                pThree="god!";
+                break;
+                case 2:
+                pThree="goddess!";
+                break;
+                case 3:
+                pThree="saint!";
+                break;
+                case 4:
+                pThree="star!";
+                break;
+                case 5:
+                pThree="knight!";
+                break;
+                case 6:
+                pThree="sprite!";
+                break;
+                case 7:
+                pThree="lionheart!";
+                break;
+                case 8:
+                pThree="angel!";
+                break;
+                case 9:
+                pThree="hero!";
+                break;
+                case 10:
+                pThree="ornament!";
+                break;
+                case 11:
+                pThree="book!";
+                break;
+                case 12:
+                pThree="champion!";
+                break;
+                case 13:
+                pThree="delight!";
+                break;
+                case 14:
+                pThree="force!";
+                break;
+                case 15:
+                pThree="nymph!";
+                break;
+                case 16:
+                pThree="warrior!";
+                break;
+                case 17:
+                pThree="muse!";
+                break;
+                case 18:
+                pThree="apple-john!";
+                break;
+                case 19:
+                pThree="melody!";
+                break;
+                case 20:
+                pThree="inspiration!";
+                break;
+                case 21:
+                pThree="wit!";
+                break;
+                case 22:
+                pThree="true-penny!";
+                break;
+                case 23:
+                pThree="valentine!";
+                break;
+                case 24:
+                pThree="love!";
+                break;
+                default:
+                message.channel.send("!!!SYSTEM ERROR!!!");
+            }
+            if(!message.content.startsWith("[]flatter player[|]")||Client.users.find("username",paramOne)){
+            if(dm){
+                if(Client.users.find("username",paramOne)){
+                Client.users.find("username",paramOne).send(beginning+pOne+pTwo+pThree);
+                message.author.send("Message successfully sent");
+                }else{
+                    message.author.send(paramOne+" does not exist. Make sure you are using the correct spelling and capitalization.");
+                }
+            }else{
+            message.channel.send(beginning+pOne+pTwo+pThree);
+            }
+        }else{
+            message.channel.send(paramOne+" does not exist. Make sure you are using the correct spelling and capitalization.");
+        }
+        }else{
+            message.channel.send("The command you tried to use does not exist. Type []help[|] to see a list of the commands that do.");
+        }}
+    if(message.content.slice(message.content.length-10,message.content.length)!==". I'm Dad."){
+    for(var i=0; i<message.content.length; i++){
+        if(message.content.slice(i, i+4).toLowerCase()==="i'm "){
+            message.channel.send("Hi, "+message.content.slice(i+4)+". I'm Dad.");
+            break;
+        }if(message.content.slice(i,i+4).toLowerCase()===" im "||message.content.toLowerCase().startsWith("im ")){
+            message.channel.send("Hi, "+message.content.slice(i+3)+". I'm Dad.");
+            break;
+        }if(message.content.slice(i,i+5).toLowerCase()==="i am "){
+            message.channel.send("Hi, "+message.content.slice(i+5)+". I'm Dad.");
+            break;
+        }
+    }}
+})
+
+Client.login(process.env.BOT_TOKEN);
